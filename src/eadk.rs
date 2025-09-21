@@ -2,6 +2,16 @@
 pub struct Color {
     pub rgb565: u16
 }
+impl Color {
+    pub const BLACK: Color = Color{rgb565: 0x0000};
+    pub const WHITE: Color = Color{rgb565: 0xffff};
+}
+
+#[repr(C)]
+pub struct Point {
+    pub x: u16,
+    pub y: u16
+}
 
 #[repr(C)]
 pub struct Rect {
@@ -9,6 +19,21 @@ pub struct Rect {
     pub y: u16,
     pub width: u16,
     pub height: u16
+}
+impl Rect {
+    pub const SCREEN_RECT: Rect = Rect {x: 0, y: 0, width: 320, height: 240};
+}
+
+pub mod battery {
+    pub fn get_battery_level() -> u8 {
+        unsafe {
+            return eadk_battery_level();
+        }
+    }
+
+    extern "C" {
+        fn eadk_battery_level() -> u8;
+    }
 }
 
 pub mod backlight {
@@ -31,6 +56,7 @@ pub mod backlight {
 }
 
 pub mod display {
+    use super::Point;
     use super::Rect;
     use super::Color;
 
@@ -46,6 +72,12 @@ pub mod display {
         }
     }
 
+    pub fn draw_string(string: &str, point: Point, large_font: bool, text_color: Color, background_color: Color) {
+        unsafe {
+            eadk_display_draw_string(string, point, large_font, text_color, background_color);
+        }
+    }
+
     pub fn wait_for_vblank() {
         unsafe {
             eadk_display_wait_for_vblank();
@@ -55,6 +87,7 @@ pub mod display {
     extern "C" {
         fn eadk_display_push_rect_uniform(rect: Rect, color: Color);
         fn eadk_display_push_rect(rect: Rect, color: *const Color);
+        fn eadk_display_draw_string(string: &str, point: Point, large_font: bool, text_color: Color, background_color: Color);
         fn eadk_display_wait_for_vblank();
     }
 }

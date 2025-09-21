@@ -3,3 +3,6 @@ name = "epsilon-sample-app"
 version = "0.1.0"
 authors = ["NumWorks <contact@numworks.com>"]
 edition = "2018"
+
+[dependencies]
+collection = "0.1.1"
